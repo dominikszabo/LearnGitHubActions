@@ -30,7 +30,6 @@ jobs:
 
   job3:
     name: Third job
-    needs: [job1, job2]
     runs-on: macos-latest
     steps:
     - name: Step One
