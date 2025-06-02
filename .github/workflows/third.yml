@@ -1,0 +1,60 @@
+name: Envioronment Variables
+env:
+    WORKSPACE_ENV_VARIABLE: 'workspace environmental variables'
+    OVER_RIDE: 'WORKFLOW'
+on: [push]
+
+jobs:
+  ubuntu:
+    env:
+      JOB_ENV_VARIABLE: 'workspace environmental variables'
+      OVER_RIDE: 'WORKFLOW'
+    runs-on: ubuntu-latest
+    steps:
+    - name: Print Custom Env Variables
+      env:
+        STEP_ENV_VARIABLE: 'workspace environmental variables'
+        OVER_RIDE: 'WORKFLOW'
+      run: |
+        echo "Hello W"
+        date 
+        
+        echo "Accessing Environet Vars using shell syntax"
+        echo "1. $WORKSPACE_ENV_VARIABLE"
+        echo "2. $JOB_ENV_VARIABLE"
+        echo "3. $STEP_ENV_VARIABLE"
+        echo "4. $OVER_RIDE"
+        echo ""
+        echo "-----------------------"
+        echo ""
+        echo "Accessing Env variables using Yaml syntax"
+        echo "5. ${{env.WORKSPACE_ENV_VARIABLE}}"
+        echo "6. ${{env.JOB_ENV_VARIABLE}}"
+        echo "7. ${{env.STEP_ENV_VARIABLE}}"
+        echo "8. ${{env.OVER_RIDE}}"
+
+
+# share output between Github Actions
+  generate_build_id:
+    runs-on: ubuntu-latest
+    outputs:
+      build_id: ${{ steps.create_id.outputs.generated_id }} # Expose step output as job output
+    steps:
+      - name: Generate a unique build ID
+        id: create_id # Step ID is crucial for referencing its outputs
+        run: |
+          # Example: Use current timestamp as a build ID
+          BUILD_ID=$(date +%Y%m%d%H%M%S)
+          echo "generated_id=$BUILD_ID" >> "$GITHUB_OUTPUT"
+          echo "Generated BUILD_ID: $BUILD_ID"
+
+  deploy_app:
+    runs-on: ubuntu-latest
+    needs: generate_build_id # This job depends on 'generate_build_id'
+    steps:
+      - name: Deploy using the generated build ID
+        run: |
+          DEPLOY_ID="${{ needs.generate_build_id.outputs.build_id }}"
+          echo "Deploying application with ID: $DEPLOY_ID"
+          # Example: Deploy command using the ID
+          # deploy_script --id "$DEPLOY_ID"
